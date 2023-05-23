@@ -31,44 +31,47 @@ if response.status_code == 200:
     for link in links:
         if link[-3:] == 'zip' and str(link) not in ['/data/archive/latest.zip','/data/neighbourhood.zip']:
             download_list.append(link)
-            
+failed_extensions = []
+
+   
 for extension in tqdm(download_list):
-    print('next link')
-    url = str('https://data.police.uk'+extension)
-    print(url)
-    session = requests.Session()
-    retry = Retry(connect=3, backoff_factor=0.5)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    
-    response = session.get(url)
-    
-    with open("response.zip", "wb") as f:
-        f.write(response.content)
-    
-    
-    
-    with zipfile.ZipFile('response.zip', 'r') as zipobj:
-        full_list = zipobj.namelist()
-        street_list  = []
-        for item in full_list:
-            if str(item[-10:]) == 'street.csv':
-                street_list.append(item)
+    try:
+            
+        print('next link')
+        url = str('https://data.police.uk'+extension)
+        print(url)
+        session = requests.Session()
+        retry = Retry(connect=3, backoff_factor=0.5)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
         
-        neighbourhood_list= []
-        for neighbourhood in street_list:
-            if neighbourhood.split('-')[3] in ['hertfordshire','metropolitan']:
-                neighbourhood_list.append(neighbourhood)
+        response = session.get(url)
         
-        for csv in tqdm(neighbourhood_list):
-            df = pd.read_csv(zipobj.open(csv), sep=',')
-            df.astype(str)
-            df = df.dropna(subset=['LSOA name', 'Crime type'])
-            df = df[df['LSOA name'].str.contains('Barnet')]
-            df = df[df['Crime type'].str.contains('Burglary')]
-            df.to_sql('temp',conn, if_exists = 'replace')
-            conn.execute('''
-                         insert or ignore into street select * from temp
-                         ''')
-    
+        with open("response.zip", "wb") as f:
+            f.write(response.content)
+        
+        with zipfile.ZipFile('response.zip', 'r') as zipobj:
+            full_list = zipobj.namelist()
+            street_list  = []
+            for item in full_list:
+                if str(item[-10:]) == 'street.csv':
+                    street_list.append(item)
+            
+            neighbourhood_list= []
+            for neighbourhood in street_list:
+                if neighbourhood.split('-')[3] in ['hertfordshire','metropolitan']:
+                    neighbourhood_list.append(neighbourhood)
+            
+            for csv in tqdm(neighbourhood_list):
+                df = pd.read_csv(zipobj.open(csv), sep=',')
+                df.astype(str)
+                df = df.dropna(subset=['LSOA name', 'Crime type'])
+                df = df[df['LSOA name'].str.contains('Barnet')]
+                #df = df[df['Crime type'].str.contains('Burglary')]
+                df.to_sql('temp',conn, if_exists = 'replace')
+                conn.execute('''
+                             insert or ignore into street select * from temp
+                             ''')
+    except:
+        failed_extensions.append(extension)

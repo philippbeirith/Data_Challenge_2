@@ -7,13 +7,13 @@ Created on Wed May  3 12:53:15 2023
 """
 import sqlite3
 
-conn = sqlite3.connect('crime_data') 
+conn = sqlite3.connect('crime_data')
 c = conn.cursor()
 
 c.execute('''
           CREATE TABLE IF NOT EXISTS street
           ([Index] INT,
-           [Crime ID] TEXT PRIMARY KEY, 
+           [Crime ID] TEXT, 
            [Month] TEXT, 
            [Reported by] TEXT,
            [Falls within] TEXT,
@@ -26,5 +26,5 @@ c.execute('''
            [Last outcome category] TEXT,
            [Context] TEXT)
           ''')
-                     
+
 conn.commit()
