@@ -16,6 +16,10 @@ import sqlite3
 import sqlalchemy
 from tqdm import tqdm
 
+#first create the data base
+from initialize_db import create_db
+create_db()
+
 #Open the database connection for use later
 conn = sqlite3.connect('crime_data') 
 

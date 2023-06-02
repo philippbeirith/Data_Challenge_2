@@ -8,7 +8,7 @@ Created on Tue May 23 14:56:16 2023
 import sqlite3
 import pandas as pd
 
-conn = sqlite3.connect('/Users/philippbeirith/Documents/GitHub/Data_Challenge_2/data/crime_data')
+conn = sqlite3.connect('data/crime_data')
 c = conn.cursor()
 
 def get(sql):
