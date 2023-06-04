@@ -1,12 +1,11 @@
 #Import other functions and data
 from dashboard_app.main import app
 from dashboard_app import data
-from dashboard_app import sql_querries
+from dashboard_app import XGboost
 
 #Import libraries
 from dash import html
 from dash import dcc
-import plotly.express as px
 from dash.dependencies import Input, Output
 import plotly.io as pio
 import webbrowser
@@ -42,7 +41,7 @@ app.layout = html.Div([
             ),
         
     #Individual graph(s)
-    dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap()),
+    dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap(df = XGboost.run_model('si'))),
     
     #Download Button
     html.Div(
@@ -61,7 +60,7 @@ app.layout = html.Div([
 @app.callback(
     Output("download-dataframe-csv", "data"),
     Input("btn_csv", "n_clicks"),
-    prevent_initial_call=True,
+    prevent_initial_call=True
 )
 def func(n_clicks):
     return ('hi')#dcc.send_data_frame(df.to_csv, "resource.csv")
@@ -69,11 +68,11 @@ def func(n_clicks):
 #This plots our prediction of burglaries (thus resource allocation) on a heatmap by ward/lsoa
 @app.callback(
     Output('crime_predictions_ward', 'figure'),
-    Input('Month', 'value')
+    Input('Month', 'value'),
     Input('crossfilter_geo_type', 'value')
 )
 def update_crime_predictions(Month, geo_type):
-    crime_predictions = data.generate_heatmap(Month, geo_type)
+    crime_predictions = data.generate_heatmap(df = XGboost.run_model('si'))
     return crime_predictions
 
 #This automatically launches a web browser with the dashboard.

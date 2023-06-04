@@ -5,7 +5,7 @@ import json
 import ast
 import plotly.express as px
 
-def generate_heatmap():
+def generate_heatmap(df):
     with open("data/lsoa_coordinates.geojson", "r") as data:
         lsoa_codes_dict = json.loads(data.read())
 
@@ -43,16 +43,15 @@ def generate_heatmap():
 
 
     # Data with latitude/longitude and values
-    df = pd.read_csv('data/geographical_mappings_cloropreth.csv')
-    df['LSOA_code'] = df['LSOA code'].astype(str)
-    df.drop(labels = ['LSOA code'], inplace = True, axis = 1)
-    df = df.groupby(['LSOA_code']).size().reset_index(name='total_reports')
+    df['LSOA_code'] = df['LSOAencoded'].astype(str)
+    df.drop(labels = ['LSOAencoded'], inplace = True, axis = 1)
+    df = df.groupby(['LSOA_code'])['predictions'].sum().reset_index(name='Predicted_Crime')
 
     fig = px.choropleth_mapbox(df, 
                                geojson=lsoa_codes_dict, 
                                locations=df.LSOA_code, 
                                featureidkey="properties.LSOA21CD",
-                               color=df.total_reports,
+                               color=df.Predicted_Crime,
                                color_continuous_scale="Viridis",
                                mapbox_style="carto-positron",
                                zoom=10,

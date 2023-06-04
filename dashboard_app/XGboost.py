@@ -94,5 +94,4 @@ def run_model(geo_type):
     output['predictions'] = preds
     output['LSOAencoded'] = LSOAle.inverse_transform(output['LSOAencoded'])
     return(output)
-    
-ou = run_model('si')
+
