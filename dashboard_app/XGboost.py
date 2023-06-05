@@ -43,24 +43,24 @@ def run_model(geo_type):
     #the previous month's burglary amount. Then the first months are dropped, since we have garbage in those fields.
     processed['target'] = -1
     prevburglary = -1
-    for index in processed.index:
+    for index in reversed(processed.index):
         if(prevburglary == -1):
             prevburglary = processed['Burglary'][index[0]][index[1]]
         else:
             processed['target'][index[0]][index[1]] = prevburglary
             prevburglary = processed['Burglary'][index[0]][index[1]]
     
-    for index in processed.index:
-        if(index[1] == 0):
-            processed = processed.drop([index])
-    
     #Here we reset the index, such that the LSOAcodes and months no longer are indexes, so that we can use them as features.
     processed = processed.reset_index().sort_values(by=['Month', 'LSOAencoded'])
+
+    for index in processed.index:
+        if (processed['Month'][index] == 38):
+            processed = processed.drop([index])
     
     processed['Year'] = np.floor(processed['Month'] / 12)
     processed['Month'] = processed['Month'] % 12
     
-    y_true = processed[(processed['Month'] + processed['Year']*12) > 30]['target']
+    y_true = processed[(processed['Month'] + processed['Year']*12) >= 30]['target']
     
     #Here we are scaling the features, to accomodate XGBoost's requirements for features. We are creating vectors for machine learning.
     features = ['LSOAencoded', 'Year', 'Month', 'Anti-social behaviour', 'Bicycle theft', 'Burglary', 'Criminal damage and arson', 
@@ -73,10 +73,10 @@ def run_model(geo_type):
     y_true.reset_index()
     
     #Assigning the training and testing datasets, with a circa 80-20 split
-    X_train = array[:6319]
-    y_train = processed[(processed['Month'] + processed['Year']*12) <= 30]['target']
-    X_test = array[6319:]
-    y_test = processed[(processed['Month'] + processed['Year']*12) > 30]['target']
+    X_train = array[:6321]
+    y_train = processed[(processed['Month'] + processed['Year'] * 12) < 30]['target']
+    X_test = array[6321:]
+    y_test = processed[(processed['Month'] + processed['Year'] * 12) >= 30]['target']
     
     #######################
     #        Model Setup  #
@@ -90,7 +90,7 @@ def run_model(geo_type):
     preds = model.predict(X_test)
     
     #Create output dataframe
-    output = processed[(processed['Month'] + processed['Year']*12) > 30][['Year', 'Month', 'LSOAencoded', 'target']]
+    output = processed[(processed['Month'] + processed['Year']*12) >= 30][['Year', 'Month', 'LSOAencoded', 'target']]
     output['predictions'] = preds
     output['LSOAencoded'] = LSOAle.inverse_transform(output['LSOAencoded'])
     return(output)
