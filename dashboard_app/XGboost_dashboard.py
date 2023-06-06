@@ -71,6 +71,7 @@ array[features] = scaler.fit_transform(processed[features])
 
 # save the last month to make the prediciton
 last_month_df = array[(array['Month'] == 1) & (array['Year'] == 1)]
+last_month_df['target'] = processed['target']
 
 #drop the months which are not verifvable
 for index in processed.index:
