@@ -176,9 +176,8 @@ def run_model(geo_type):
     
     #Assigning the training and testing datasets, with a circa 80-20 split
     X_train = array
-    y_train = processed[(processed['Year'] != 3) & (processed['Month'] != 0)]['target']
+    y_train = processed[(processed['Year'] != 3) and (processed['Month'] != 2)]['target']
     X_test = last_month_df[features]
-    y_test = last_month_df['target']
     
     #######################
     #        Model Setup  #
