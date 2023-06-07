@@ -13,6 +13,8 @@ from threading import Timer
 #Set it so graphs created during testing open in a browser
 pio.renderers.default='browser'
 
+#pre run model
+df = XGboost.run_model('si')
 #######################
 #Set up app structure #
 #######################
@@ -20,17 +22,6 @@ pio.renderers.default='browser'
 app.layout = html.Div([
     #Title
     html.Div(children='Predicting Burglaries in Barnet'),
-    
-    html.Div(children=[
-
-        html.Br(),
-        html.Label('Predictions for month of:'),
-        dcc.Slider(
-            min=0,
-            max=9,
-            marks={i: f'Label {i}' if i == 1 else str(i) for i in range(1, 6)},
-            value=5,
-        )]),
     
     #LSOA/Ward selector
     dcc.RadioItems(
@@ -41,7 +32,7 @@ app.layout = html.Div([
             ),
         
     #Individual graph(s)
-    dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap(df = XGboost.run_model('si'))),
+    dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap(df)),
     
     #Download Button
     html.Div(
@@ -62,16 +53,15 @@ app.layout = html.Div([
     Input("btn_csv", "n_clicks"),
     prevent_initial_call=True
 )
-def func(n_clicks):
-    return ('hi')#dcc.send_data_frame(df.to_csv, "resource.csv")
+def func(n_clicks, ):
+    return dcc.send_data_frame(df.to_excel, "resource_allocations.xlsx", sheet_name="Allocations")
 
 #This plots our prediction of burglaries (thus resource allocation) on a heatmap by ward/lsoa
 @app.callback(
     Output('crime_predictions_ward', 'figure'),
-    Input('Month', 'value'),
     Input('crossfilter_geo_type', 'value')
 )
-def update_crime_predictions(Month, geo_type):
+def update_crime_predictions(geo_type):
     crime_predictions = data.generate_heatmap(df = XGboost.run_model('si'))
     return crime_predictions
 
@@ -87,7 +77,3 @@ if __name__ == "__main__":
     Timer(1, open_browser).start()
     app.run_server(debug=False, port=8050)
     
-    
-    
-    
-df2 = XGboost_dashboard.run_model('si')

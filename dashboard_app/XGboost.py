@@ -11,6 +11,7 @@ import sqlite3
 
 
 def run_model(geo_type):
+    print('Pulling data from database')
     sqliteConnection = sqlite3.connect('C:/Users/phil/Documents/GitHub/Data_Challenge_2/data/crime_data')        
     read_in = pd.read_sql_query("""SELECT *
                                 FROM street
@@ -82,7 +83,7 @@ def run_model(geo_type):
     #######################
     #        Model Setup  #
     #######################
-    
+    print('creating model')
     # create model
     model = xg.XGBRFRegressor(n_estimators=200, max_depth=12, learning_rate=1)#objective='binary:logistic')
     # fit model
@@ -99,5 +100,3 @@ def run_model(geo_type):
     output['allocation'] = np.floor((output['predictions'] / output.groupby(['Year', 'Month'])['predictions'].transform('sum')) * 3000)
 
     return(output[(output['Year'] == 3) & (output['Month'] == 1)])
-
-test = run_model('si')
