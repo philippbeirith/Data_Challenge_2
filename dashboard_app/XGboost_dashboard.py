@@ -12,7 +12,7 @@ import sqlite3
 
 
 
-sqliteConnection = sqlite3.connect('/Users/philippbeirith/Documents/GitHub/Data_Challenge_2/data/crime_data')        
+sqliteConnection = sqlite3.connect('C:/Users/phil/Documents/GitHub/Data_Challenge_2/data/crime_data')        
 read_in = pd.read_sql_query("""SELECT *
                             FROM street
                             WHERE Month >= 2020-01""", sqliteConnection)  

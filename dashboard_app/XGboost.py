@@ -10,7 +10,7 @@ import sqlite3
 
 
 def run_model(geo_type):
-    sqliteConnection = sqlite3.connect('data/crime_data')        
+    sqliteConnection = sqlite3.connect('C:/Users/phil/Documents/GitHub/Data_Challenge_2/data/crime_data')        
     read_in = pd.read_sql_query("""SELECT *
                                 FROM street
                                 WHERE Month >= 2020-01""", sqliteConnection)  
@@ -93,5 +93,10 @@ def run_model(geo_type):
     output = processed[(processed['Month'] + processed['Year']*12) >= 30][['Year', 'Month', 'LSOAencoded', 'target']]
     output['predictions'] = preds
     output['LSOAencoded'] = LSOAle.inverse_transform(output['LSOAencoded'])
-    return(output)
+    output = output[(output['Year'] == 3) & (output['Month'] == 1)]
+    
+    output['allocation'] = (output['predictions'] / output['predictions'].sum()) * 3000
+    
+    return(output[(output['Year'] == 3) & (output['Month'] == 1)])
 
+test = run_model('si')

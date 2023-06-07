@@ -1,7 +1,7 @@
 #Import other functions and data
 from dashboard_app.main import app
 from dashboard_app import data
-from dashboard_app import XGboost_dashboard
+from dashboard_app import XGboost
 
 #Import libraries
 from dash import html
@@ -41,7 +41,7 @@ app.layout = html.Div([
             ),
         
     #Individual graph(s)
-    dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap(df = XGboost_dashboard.run_model('si'))),
+    dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap(df = XGboost.run_model('si'))),
     
     #Download Button
     html.Div(
@@ -72,7 +72,7 @@ def func(n_clicks):
     Input('crossfilter_geo_type', 'value')
 )
 def update_crime_predictions(Month, geo_type):
-    crime_predictions = data.generate_heatmap(df = XGboost_dashboard.run_model('si'))
+    crime_predictions = data.generate_heatmap(df = XGboost.run_model('si'))
     return crime_predictions
 
 #This automatically launches a web browser with the dashboard.
