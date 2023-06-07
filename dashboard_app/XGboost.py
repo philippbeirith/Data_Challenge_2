@@ -95,7 +95,8 @@ def run_model(geo_type):
     output['LSOAencoded'] = LSOAle.inverse_transform(output['LSOAencoded'])
     output = output[(output['Year'] == 3) & (output['Month'] == 1)]
     
-    output['allocation'] = (output['predictions'] / output['predictions'].sum()) * 3000
+    output['allocation'] = (output['predictions'] / output.groupby(['Year', 'Month'])['predictions'].transform('sum')) * 3000
+
     
     return(output[(output['Year'] == 3) & (output['Month'] == 1)])
 
