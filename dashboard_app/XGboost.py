@@ -5,6 +5,7 @@ import matplotlib as plt
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
+import numpy as np
 
 import sqlite3
 
@@ -95,9 +96,8 @@ def run_model(geo_type):
     output['LSOAencoded'] = LSOAle.inverse_transform(output['LSOAencoded'])
     output = output[(output['Year'] == 3) & (output['Month'] == 1)]
     
-    output['allocation'] = (output['predictions'] / output.groupby(['Year', 'Month'])['predictions'].transform('sum')) * 3000
+    output['allocation'] = np.floor((output['predictions'] / output.groupby(['Year', 'Month'])['predictions'].transform('sum')) * 3000)
 
-    
     return(output[(output['Year'] == 3) & (output['Month'] == 1)])
 
 test = run_model('si')
