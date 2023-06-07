@@ -14,7 +14,7 @@ from threading import Timer
 pio.renderers.default='browser'
 
 #pre run model
-df = XGboost.run_model('si')
+allocation, df = XGboost.run_model('si')
 #######################
 #Set up app structure #
 #######################
@@ -54,7 +54,7 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 def func(n_clicks, ):
-    return dcc.send_data_frame(df.to_excel, "resource_allocations.xlsx", sheet_name="Allocations")
+    return dcc.send_data_frame(allocation.to_excel, "resource_allocations.xlsx", sheet_name="Allocations")
 
 #This plots our prediction of burglaries (thus resource allocation) on a heatmap by ward/lsoa
 @app.callback(

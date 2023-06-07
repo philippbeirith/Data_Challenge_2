@@ -9,6 +9,11 @@ import numpy as np
 
 import sqlite3
 
+#import lsoa to ward code mappings
+code_mappings = pd.read_csv('data/lsoa_ward.csv')
+code_mappings = code_mappings[code_mappings['LAD22NM'] == 'Barnet']
+code_mappings['LSOAencoded'] = code_mappings['LSOA11CD']
+code_mappings = code_mappings[['LSOAencoded', 'LSOA11NM']]
 
 def run_model(geo_type):
     print('Pulling data from database')
@@ -54,7 +59,7 @@ def run_model(geo_type):
     
     #Here we reset the index, such that the LSOAcodes and months no longer are indexes, so that we can use them as features.
     processed = processed.reset_index().sort_values(by=['Month', 'LSOAencoded'])
-
+    
     for index in processed.index:
         if (processed['Month'][index] == 38):
             processed = processed.drop([index])
@@ -96,7 +101,12 @@ def run_model(geo_type):
     output['predictions'] = preds
     output['LSOAencoded'] = LSOAle.inverse_transform(output['LSOAencoded'])
     output = output[(output['Year'] == 3) & (output['Month'] == 1)]
-    
+    output['LSOAencoded'] = output['LSOAencoded'].astype(str)
+    allocations = output.merge(code_mappings, left_on='LSOAencoded', right_on='LSOAencoded', how='inner')
+    allocations = allocations.drop(columns=['LSOAencoded'])
+    allocations['LSOA11NM'] = allocations['LSOA11NM'].apply(lambda x: x[:-1])
+    allocations = allocations.groupby(['Year', 'Month', 'LSOA11NM'])['predictions'].sum().reset_index()
+    allocations['allocation'] = np.floor((allocations['predictions'] / allocations.groupby(['Year', 'Month'])['predictions'].transform('sum')) * 3000)
     output['allocation'] = np.floor((output['predictions'] / output.groupby(['Year', 'Month'])['predictions'].transform('sum')) * 3000)
 
-    return(output[(output['Year'] == 3) & (output['Month'] == 1)])
+    return(allocations, output)
