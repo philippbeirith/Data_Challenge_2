@@ -22,14 +22,6 @@ allocation, df = XGboost.run_model('si')
 app.layout = html.Div([
     #Title
     html.Div(children='Predicting Burglaries in Barnet'),
-    
-    #LSOA/Ward selector
-    dcc.RadioItems(
-                ['LSOA Codes', 'Wards'],
-                'Linear',
-                id='crossfilter_geo_type',
-                labelStyle={'display': 'inline-block', 'marginTop': '5px'}
-            ),
         
     #Individual graph(s)
     dcc.Graph(id='crime_predictions_ward', figure = data.generate_heatmap(df)),
@@ -56,14 +48,6 @@ app.layout = html.Div([
 def func(n_clicks, ):
     return dcc.send_data_frame(allocation.to_excel, "resource_allocations.xlsx", sheet_name="Allocations")
 
-#This plots our prediction of burglaries (thus resource allocation) on a heatmap by ward/lsoa
-@app.callback(
-    Output('crime_predictions_ward', 'figure'),
-    Input('crossfilter_geo_type', 'value')
-)
-def update_crime_predictions(geo_type):
-    crime_predictions = data.generate_heatmap(df = XGboost.run_model('si'))
-    return crime_predictions
 
 #This automatically launches a web browser with the dashboard.
 def open_browser():
